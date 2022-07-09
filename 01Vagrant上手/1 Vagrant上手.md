@@ -4,20 +4,18 @@
 
 ### What is Vargrant
 
-- Vagrant is a tool for building and managing virtual machine environments.
-- Free and open source (Ruby)
+- Vagrant is a **tool** for **building and managing virtual machine environments**.
+- **Free** and **open source** (Ruby)
 
-![image-20220216182135103](../img/image-20220216182135103.png)
+![image-20220709122937572](G:\server_demo\vagrant_demo\img\image-20220709122937572.png)
 
 ### Virtualization
 
-![image-20220216182254594](../img/image-20220216182254594.png)
+![image-20220709123255614](G:\server_demo\vagrant_demo\img\image-20220709123255614.png)
 
 ### How vagrant works?
 
-Provisioners
-
-![image-20220216182520033](../img/image-20220216182520033.png)
+![image-20220709123401364](G:\server_demo\vagrant_demo\img\image-20220709123401364.png)
 
 ### Vagrant VS Docker (VM vs Container)
 
@@ -32,21 +30,23 @@ Provisioners
 
 ### Vagrant、Hyper-V/VirtulBox下载
 
-- http://vagrantup.com
+​	
 
-- http://docs.microsoft.com
+- [vagrant安装](http://vagrantup.com)
 
-- http://virtualbox.org 
+- [Hyper-V](http://docs.microsoft.com)
+
+- [Virtualbox](http://virtualbox.org)
 
 - 验证安装是否成功
 
   ```shell
-  vagrant --version
+  $vagrant --version
   ```
 
 ## 1-3 通过 Hyper-v 创建第一个 Vagrant Host
 
-1. 打开 Vagrant Cloud官网: https://app.vagrantup.com/boxes/search
+1. 打开 Vagrant Cloud官网: [Vagrant Cloud]( https://app.vagrantup.com/boxes/search)
 
 2. 使用 [generic](https://app.vagrantup.com/generic)/[ubuntu2004](https://app.vagrantup.com/generic/boxes/ubuntu2004) 
 
@@ -54,11 +54,15 @@ Provisioners
    $ cd E:\linux
    $ mkdir vagrant_demo
    $ cd vagrant_demo
+   
+   # 创建一个Vagrantfile文件
    $ vagrant init generic/ubuntu2004
+   # --provider 参数指定使用hyperv
    $ vagrant up --provider=hyperv --color
+   # 查看虚拟机状态
    $ vagrant status
    ```
-
+   
    
 
 ## 1-4 通过 VirtualBox 创建第一个 Vagrant Host
@@ -69,14 +73,20 @@ Provisioners
    $ cd E:\linux
    $ mkdir vagrant_virtualbox
    $ cd vagrant_virtualbox
+   
+   # 使用 --provider=virtualbox 指定使用virtualbox创建
    $ vagrant init generic/centos7
    $ vagrant up --provider=virtualbox
    $ vagrant status
    ```
-
+   
    
 
 ## 1-5 国内下载 Vagratn Box 慢怎么办
+
+使用镜像下载: [Centos7](https://mirrors.ustc.edu.cn/centos-cloud/centos/7/vagrant/x86_64/images/)
+
+
 
 ```bash
 $ vagrant box list
@@ -88,18 +98,19 @@ $ vagrant init centos7
 
 ### Vagrant basic CMD
 
-- Start: `vagrant up`
-- Check status: `vagrant status`
-- SSH Connect: `vagrant ssh <name>`
-- SSH cfg: `vagrant ssh-config`
-- Suspend/resume/reload/stop: `vagrant suspend/resume/reload/halt <name>`
-- Delete/Remove: `vagrant destroy <name>`
+- 开始 : `vagrant up`
+- 检查状态 : `vagrant status`
+- 使用SSH连接 : `vagrant ssh <name>`
+- SSH配置 : `vagrant ssh-config`
+- Suspend(暂停)/resume(恢复)/reload(重启)/halt(关机) : `vagrant suspend/resume/reload/halt <name>`
+- 删除虚拟机 : `vagrant destroy <name>`
 
 ## 1-7 Vagrant 的 ssh config
 
 1. hyperv里的 `vagrant ssh-config`
 
-   ```yaml
+   ```bash
+   $ vagrant ssh-config
    Host default
      HostName fe80::215:5dff:fe38:100 #  默认是分配的地址加22端口
      User vagrant
@@ -114,7 +125,8 @@ $ vagrant init centos7
 
 2. virtualbox里的`vagrant ssh-config`
 
-   ```yaml
+   ```bash
+   $ vagrant ssh-config
    Host default
      HostName 127.0.0.1 # 默认是127.0.0.1,本地地址加不同端口
      User vagrant
@@ -127,4 +139,3 @@ $ vagrant init centos7
      LogLevel FATAL
    ```
 
-## 1-8 VirtualBox 和 Hyper-V 共存

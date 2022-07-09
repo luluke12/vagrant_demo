@@ -1,0 +1,26 @@
+---
+- name: test
+  hosts: all
+  gather_facts: true
+  become: true
+  
+  tasks:
+    - name: Add epel-release repo
+      yum:
+        name: epel-release
+        state: present
+        
+    - name: Install nginx
+      yum:
+          name: nginx
+          state: present
+          
+    - name: Install Index Page
+      template:
+        src: index.html
+        dest: /usr/share/nginx/html/index.html
+          
+    - name: Start NGINX
+      service:
+        name: nginx
+        state: started

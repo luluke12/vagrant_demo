@@ -1,0 +1,32 @@
+# 1 Shell的inline模式
+=begin
+$script = '<<-SCRIPT'
+  apt-get update
+  apt-get install -y apache2
+  sudo yum install -y epel-release
+  sudo yum install -y nginx
+  sudo systemctl start nginx
+  sudo yum install -y vim
+SCRIPT
+
+Vagrant.configure do |config|
+  config.vm.provision "shell", inline: $script
+end
+=end
+
+# 2Shell使用外部脚本
+Vagrant.configure do |congig|
+  config.vm.box = "centos7"
+  config.vm.hostname = "docker"
+  config.vm.provision "shell", path: "./setup.sh"
+end
+
+
+# 3 Ansible
+=begin
+Vagrant.configure do |config|
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbool.yml"
+  end
+end
+=end

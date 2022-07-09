@@ -5,12 +5,12 @@
 1. 创建一个box,需要自己安装很多东西
 
    ```bash
-   vagrant status
-   vagrant ssh
-   sudo yum install -y epel-release
-   sudo yum install -y nginx
-   sudo systemctl start nginx
-   ip -c a
+   $ vagrant status
+   $ vagrant ssh
+   $ sudo yum install -y epel-release
+   $ sudo yum install -y nginx
+   $ sudo systemctl start nginx
+   $ ip -c a
    #...
    # 很麻烦
    ```
@@ -22,28 +22,32 @@
 1. Vagrantfile 配置
 
    ```ruby
-   config.vm.provision "shell", inline: <<-SHELL
-   	# apt-get update
-   	# apt-get install -y apache2
-   	sudo yum install -y epel-release
-   	sudo yum install -y nginx
-   	sudo systemctl start nginx
-   	sudo yum install -y vim
-   SHELL
+   $script = <<-SCRIPT
+     apt-get update
+     apt-get install -y apache2
+     sudo yum install -y epel-release
+     sudo yum install -y nginx
+     sudo systemctl start nginx
+     sudo yum install -y vim
+   SCRIPT
+   
+   Vagrant.configure("2") do |config|
+   	config.vm.provision "shell", inline: $script
+   end
    ```
 
 2. Provisioners 的三种执行的情况
 
-   - vagrant up
-   - vagrant provision
-   - vagrant reload --provision
+   - vagrant up: 初次创建
+   - vagrant provision: 已经存在了的虚拟机
+   - vagrant reload --provision: 重新加载
 
 3. 使用vagrant reload --provison
 
    ```bash
-   vagrant reload
-   vagrant ssh
-   ip -c a
+   $ vagrant reload
+   $ vagrant ssh
+   $ ip -c a
    ```
 
    
@@ -81,25 +85,27 @@
 
    `vagrant init centos/7`
 
-   ```
-   config.vm.provision "shell", path: "./setup.sh"
+   ```ruby
+   Vagrant.configure do |config|
+     config.vm.provision "shell", path: "./setup.sh"
+   end
    ```
 
 3. 创建
 
    ```bash
-   vagrant up
-   vagrant status
-   vagrant ssh
+   $ vagrant up
+   $ vagrant status
+   $ vagrant ssh
    # docker 需要sudo, 可能是加入组的命令没有成功成功
-   sudo docker version
+   $ sudo docker version
    
    # bug 解决方法
-   sudo gpasswd -a $USER docker
-   sudo systemctl restart docker
+   $ sudo gpasswd -a $USER docker
+   $ sudo systemctl restart docker
    exit
-   vagrant ssh
-   docker version
+   $ vagrant ssh
+   $ docker version
    ```
 
    
@@ -109,7 +115,9 @@
 1. Vagrangfile
 
    ```ruby
-   config.vm.provision "ansible", playbook: "playbook.yml"
+   Vagrant.congfigure("2") do |config|  
+     config.vm.provision "ansible", playbook: "playbook.yml"
+   end
    # ansible 基本在linux和maxos系统上, windows上比较麻烦
    ```
 
@@ -123,25 +131,25 @@
      become: true
      
      tasks:
-       - name : Add epel-release repo
+       - name: Add epel-release repo
          yum:
            name: epel-release
            state: present
            
-         - name: Install nginx
-           yum:
+       - name: Install nginx
+         yum:
              name: nginx
              state: present
              
-         - name: Install Index Page
-           template:
-             src: index.html
-             dest: /usr/share/nginx/html/index.html
+       - name: Install Index Page
+         template:
+           src: index.html
+           dest: /usr/share/nginx/html/index.html
              
-         - name: Start NGINX
-           service:
-             name: nginx
-             state: started
+       - name: Start NGINX
+         service:
+           name: nginx
+           state: started
    ```
 
 3. 创建虚拟机

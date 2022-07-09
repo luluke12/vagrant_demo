@@ -1,0 +1,42 @@
+# 1端口转发规则
+=begin
+Vagrant.configure("2") do |config|
+  # 可以配置多条转发规则
+  config.vm.network "forwarded_port",guest: 80, host: 8080, host_ip: 127.0.0.1
+end
+=end
+
+# 2private_network
+host_list = [
+  {
+   :name => "host1",
+   :eth1 => "192.168.50.10",
+   :eth2 => "192.168.0.101"
+  },
+  {
+    :name => "host1",
+    :eth1 => "192.168.50.11",
+    :eth2 => "192.168.0.101"
+  }
+]
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos7"
+  host_list.each do |item|
+    config.vm.define item[:name] do |host|
+
+      host.vm.hostname = item[:name]
+
+      # eth1: host-only网络, 通过 "VirtualBox Host-Only Ethernet Adapter #2" 这个适配器连接
+      # 可以使用dhcp; 也可以设置成静态ip
+      # host.vm.network "private_network", type: "dhcp"
+      host.vm.network "private_network", ip:item[:eth1]
+
+      # eth2: bridged 网络，直接通过wifi分配ip地址；可以通过wifi上网，以及访问同一wifi下的主机
+      # 默认是dhcp分配，也可以配置静态ip
+      # host.vm.network "public_network", bridged: 指定用于桥接的适配器
+      host.vm.network "public_network", ip: item[:eth2], bridged:" Realtek 8821AE Wireless LAN 802.11ac PCI-E NIC" 
+      
+    end
+  end
+end

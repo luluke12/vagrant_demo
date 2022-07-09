@@ -1,0 +1,44 @@
+# 1vagrant的vm配置
+=begin
+Vagrant.configure("2") do |config|
+
+  # vagrant的vm配置
+  config.vm.box = "centos7"
+  config.vm.hostname = "vagrant-demo"
+  config.vm.box_version = "0"
+
+  # 不安全; 会使用默认的 insercure_private_key (每个都有)
+  # 也可以指定使用 private_key
+  config.ssh.insert_key = false
+end
+=end
+
+# 2多台虚拟机的配置
+host_list = [
+  {
+    :name => "host1",
+    :box => "centos7",
+    :hostname => "web"
+  },
+  {
+    :name => "host2",
+    :box => "centos2",
+    :hostname => "database"
+  },
+  {
+    :name => "host3",
+    :box => "generic/centos8",
+    :hostname => "nginx"
+  }
+]
+
+Vagrant.configure() do |config|
+
+  host_list.each do |item|
+    config.vm.define item[:name] do |host|
+      host.vm.box = item[:box]
+      host.vm.hostname = item[:hostname]
+      host.vm.synced_folder ".", "/vagrant", type: "smb"
+    end
+  end
+end

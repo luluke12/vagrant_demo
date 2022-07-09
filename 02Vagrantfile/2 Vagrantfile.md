@@ -7,7 +7,6 @@
 ### Vagrantfile 文件
 
 ```ruby
-
 Vagrant.configure("2") do |config|
   config.vm.box = "centos7"
 end
@@ -20,9 +19,11 @@ end
 ###  用户家目录里的 .vagrant.d/ 文件夹
 
 ```bash
-cd ~
+$ cd ~
 cd ./.vagrant.d/
-tree /F
+
+# 查看box的版本等信息
+$ tree /F
 ## boxes 下是存镜像的
 ```
 
@@ -45,13 +46,15 @@ tree /F
    # 添加的配置
    Vagrant.configure("2") do |config|
      config.vm.box = "centos/7"
-       # 配置主机名
+       
+     # 配置主机名
      config.vm.hostname = "vagrant-demo"
+       
      # 配置版本
      config.vm.box_version = "1905.1"
    end
    ```
-
+   
    
 
 ## 2-3 关于Vagrant 的 SSH 链接 
@@ -60,15 +63,18 @@ tree /F
 
 ```bash
 # 使用ssh免密登录虚拟机
-vargrant ssh
+$ vargrant ssh
+
 # 查看sshd的配置文件
-cd /etc/ssh
-sudo more sshd_config
+$ cd /etc/ssh
+$ sudo more sshd_config
+
 # 修改密码登录权限
-vim /etc/ssh/sshd_config
+$ vim /etc/ssh/sshd_config
+
 # 把 PasswordAuthentication 修改为 yes
 # 重启sshd服务
-sudo service sshd restart
+$ sudo service sshd restart
 ```
 
 ### config 的本地配置
@@ -113,18 +119,17 @@ sudo service sshd restart
 1. 设置Vagrantfile
 
    ```ruby
-   config.ssh.insert_key=false // 使用insecure_private_key不安全
+   # 使用insecure_private_key不安全
+   Vagrant.configure("2") do |config|
+       # config.ssh.insert_key 默认为 true; 设置为 false 时Vagrant不会生成private_key; 而是使用默认的insercure_private_key(不安全)
+   	config.ssh.insert_key=false 
+   end
    ```
 
-2. 重新开启box
+2. 使用 insecure_private_key
 
-   ```
-   vagrant destroy -f
-   vagrant up
-   vagrant ssh-config
-   vagrant ssh
-   exit
-    ssh -i C:/Users/Administrator/.vagrant.d/insecure_private_key vagrant@127.0.0.1 -p 2222
+   ```bash
+   $ ssh -i C:/Users/Administrator/.vagrant.d/insecure_private_key vagrant@127.0.0.1 -p 2222
    ```
 
 ## 2-5 一个 Vagrantfile 创建多个 Host
@@ -133,14 +138,19 @@ sudo service sshd restart
 
    ```ruby
    Vagrant.configure("2") do |config|
+     # config级别的是全局配置
      config.vm.box = "centos/7"
      config.vm.hostname = "vagrant-demo"
      config.vm.box_version = "1905.1"
      config.ssh.insert_key=false
+       
+     # 第一台 web-server 的局部配置
      config.vm.define "web-server" do  |web| 
        web.vm.hostname = "web"
        web.vm.box_version = "2004.01"
      end
+       
+     # 第二台 database 的局部配置
      config.vm.define "database" do |db| 
        db.vm.hostname = "db"
      end
@@ -149,9 +159,9 @@ sudo service sshd restart
 
 2. 重新创建
 
-   ```ruby
-   vagrant destroy -f
-   vagrant up
+   ```bash
+   $ vagrant destroy -f
+   $ vagrant up
    ```
 
 
@@ -163,73 +173,70 @@ sudo service sshd restart
    host_list = [
      {
        :name => "host1",
-       :box => "centos/7"
+       :box => "centos7",
+       :hostname => "web"
      },
      {
        :name => "host2",
-       :box => "centos/7"
+       :box => "centos2",
+       :hostname => "database"
      },
      {
        :name => "host3",
-       :box => "generic/centos8"
-     },
+       :box => "generic/centos8",
+       :hostname => "nginx"
+     }
    ]
    
-   Vagrant.configure("2") do |config|
+   Vagrant.configure() do |config|
+   
      host_list.each do |item|
+         
+       # item[:name] 用于 vagrant ssh item[:name] 连接时的名字
        config.vm.define item[:name] do |host|
          host.vm.box = item[:box]
+           
+         # item[:hostname] 是进入虚拟机中对应的hostname(例如: vagrat@web 对应的web)
+         host.vm.hostname = item[:hostname]
        end
-     end 
+     end
    end
    ```
 
-2. ```
-   vagrant status
-   vagrant up
-   ```
+   
 
 ## 2-7 Sync Folder 如何同步文件
 
-1. 打开如下文件
+默认情况下. Vagrant 把当前目录同步到虚拟机的/vagrant目录，但是是一次性同步。
 
-   ```bash
-   cd ~
-   cd .vagrant.d/
-   cd boxs/
-   cd centos-.../
-   cd 2004.01/
-   cd virtualbox/
-   ls
-   code Vagrantfile
-   ```
+如果想实时同步, 可以先禁用默认的同步方案，再设置
 
-2. 修改文件内容
+1. 修改文件内容
 
    ```ruby
    Vagrant.configure("2") do |config|
-     config.vm.base_mac = "5254004d77d3"
-     # config.vm.synced_folder ".", "/vagrant", type: "rsync"
+     config.vm.synced_folder ".", "/vagrant", disabled: true
    end
-   
    ```
 
-3. 安装 vagrant 的插件
+2. 安装 vagrant 的插件 vagrant-vbguest
 
    ```bash
    # 查看 已安装的插件
-   vagrant plugin list
-   vagrant plugin install vagrant-vbguest
+   $ vagrant plugin list
+   $ vagrant plugin install vagrant-vbguest
    ```
 
-4. 重新启动box
+3. 重新启动box
 
-   ```
-   vagrant destroy -f
-   vagrant up
+   ```bash
+   $ vagrant destroy -f
+   $ vagrant up
    ```
 
 ## 2-8 Hyper-V 和 文件同步
+
+Windows 可以使用 smb 来同步
 
 1. 查看PowerShell版本:必须大于等于3
 
@@ -260,10 +267,12 @@ sudo service sshd restart
 3. 重启box
 
    ```bash
-   vagrant up
+   $ vagrant up
    ```
 
 ## 2-9 一个同时适应 Hyper-V 和 VirtualBox 的Vagrantfile
+
+对于 windows 来说，都使用 smb 即可
 
 1. 修改Vagrantfile
 
@@ -280,8 +289,9 @@ sudo service sshd restart
      config.vm.provider "hyperv" do |v|
        config.vm.synced_folder ".", "/vagrant", type: "smb"
      end
-     config.vm.provider "virtualbox" do |_,override|
-       config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+     config.vm.provider "virtualbox" do |_, override|
+        # 使用 vagrant-vbguest 插件
+       override.vm.synced_folder ".", "/vagrant",  disabled: true
      end
    
      host_list.each do |item|
@@ -291,6 +301,6 @@ sudo service sshd restart
      end 
    end
    ```
-
+   
    
 
